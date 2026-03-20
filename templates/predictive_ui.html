@@ -1,0 +1,184 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block extra_css %}
+<style>
+    body { background: #fafafa; }
+    .content-wrapper { display: flex; justify-content: center; align-items: center; padding-top: 90px; }
+    .main-content { padding-top: 120px; padding-bottom: 60px; }
+    .fixed-top-bar { position: fixed; top: 52px; left: 0; width: 100%; background: #fafafa; padding: 12px 0; z-index: 1040; text-align: center; }
+    .input-wrapper { position: relative; width: 55%; gap: 20px; display: inline-flex; }
+    #queryInput { width: 100%; padding: 15px; border-radius: 30px; border: 1px solid #888; }
+    #queryInput:focus { outline: none; }
+    .send-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 35px; cursor: pointer; }
+    .chart-controls { margin-top: 12px; text-align: right; margin-bottom: 10px; margin-right: 18px;}
+    #chartTypeSelect {padding: 3px 1px;  border-radius: 4px;border: 1px solid #ccc;}
+        #metricChart { background: white; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fixed-top-bar">
+    <h2 style="font-weight:500;">Predictive AI</h2>
+    <div class="input-wrapper d-inline-flex">
+        <a href="/ask-ai" class="btn btn-outline-secondary me-2 mt-2" style="width:112px;height:40px;">← Back</a>
+        <input type="text" id="queryInput" placeholder="Ask like: host cpu | process memory | service response time" />
+        <img src="{% static 'arrow_up.png' %}" class="send-icon" onclick="sendQuery()" alt="Send" />
+    </div>
+    <hr>
+</div>
+
+<div class="main-content container">
+    <div class="chart-controls" style="display:none;" id="chartControls">
+        <select id="chartTypeSelect" style="margin-right: 10px;">
+            <option value="line" selected>Line Graph</option>
+            <option value="bar">Bar Graph</option>
+        </select>
+        <!-- Download icon button -->
+        <img
+            src="{% static 'download.png' %}"
+            alt="Download PDF"
+            title="Download PDF"
+            style="width:17px; cursor:pointer;"
+            onclick="downloadChart()"
+        />
+    </div>
+
+    <!-- Canvas for Charts -->
+    <canvas id="metricChart" height="120" style="display:none;"></canvas>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Add jsPDF library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+let chartInstance = null;
+let currentData = null;
+
+function sendQuery() {
+    const query = document.getElementById("queryInput").value;
+
+    fetch(`/ai-query/?q=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.error){ alert(data.error); return; }
+            currentData = data;
+            document.getElementById("metricChart").style.display = "block";
+            document.getElementById("chartControls").style.display = "block";
+            renderChart("line");
+        });
+}
+
+function renderChart(type) {
+    const canvas = document.getElementById("metricChart");
+    const ctx = canvas.getContext("2d");
+    // 🔍 Find today index (last actual value)
+    const todayIndex = currentData.actual
+        .map(v => v !== null)
+        .lastIndexOf(true);
+
+    // Bar graph data (filtered)
+    const barActualData = currentData.actual.map((v, i) =>
+        i <= todayIndex ? v : null
+    );
+
+    const barPredictedData = currentData.predicted.map((v, i) =>
+        i > todayIndex ? v : null
+    );
+
+    let actualDataset;
+    let predictedDataset;
+
+    if (type === "bar") {
+        actualDataset = barActualData;
+        predictedDataset = barPredictedData;
+    } else {
+        // 👉 LINE GRAPH FIX
+
+        // Actual line stops at today
+        actualDataset = currentData.actual.map((v, i) =>
+            i <= todayIndex ? v : null
+        );
+
+        // Prediction starts from SAME POINT where actual ended
+        predictedDataset = currentData.predicted.map((v, i) => {
+            if (i < todayIndex) return null;
+
+            // At transition point, use last actual value so lines connect
+            if (i === todayIndex) return currentData.actual[todayIndex];
+
+            return v;
+        });
+    }
+    if(chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(ctx, {
+        type: type,
+        data: {
+            labels: currentData.labels,
+            datasets: [
+        {
+            label: `Actual ${currentData.metric}`,
+            data: actualDataset,
+            borderWidth: 2,
+            backgroundColor: 'rgba(0,123,255,0.4)',
+            borderColor: 'rgba(0,123,255,1)',
+            fill: false,
+            spanGaps:true
+        },
+        {
+            label: `Predicted ${currentData.metric}`,
+            data: predictedDataset,
+            borderDash: [5,5],
+            borderWidth: 2,
+            borderColor: 'rgba(255,99,132,1)',
+            backgroundColor: 'rgba(255,99,132,0.4)',
+            fill: false,
+            spanGaps:true
+        }
+    ]
+
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `${currentData.metric} Forecast (Next 7 Days)`
+                }
+            },
+            scales: {
+                y: { min: 0, title: { display: true, text: currentData.metric } },
+                x: { title: { display: true, text: "Date" } }
+            }
+        }
+    });
+}
+
+// Change chart type on select
+document.getElementById("chartTypeSelect").addEventListener("change", function() {
+    renderChart(this.value);
+});
+
+// Download chart as PDF
+function downloadChart() {
+    const { jsPDF } = window.jspdf;
+    const canvas = document.getElementById("metricChart");
+    const imgData = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width + 100, canvas.height + 100] // make some padding
+    });
+
+    pdf.text(currentData.metric + " Chart", 50, 30); // Title
+    pdf.addImage(imgData, 'PNG', 50, 50, canvas.width, canvas.height);
+    pdf.save(`${currentData.metric}_${document.getElementById("chartTypeSelect").value}.pdf`);
+}
+</script>
+
+{% endblock %}

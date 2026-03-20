@@ -1,0 +1,264 @@
+body{
+font-family:'Inter',sans-serif;
+}
+
+
+
+/* PAGE BACKGROUND */
+
+.auth-bg{
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#e8edf6;
+}
+
+
+
+/* MAIN CARD */
+
+.auth-card{
+width:920px;
+max-width:95%;
+display:flex;
+flex-direction:row-reverse;
+background:#ffffff;
+border-radius:16px;
+box-shadow:0 20px 40px rgba(0,0,0,0.08);
+overflow:hidden;
+}
+
+
+
+/* RIGHT PANEL */
+
+.auth-left{
+flex:1;
+padding:36px;
+/* background: linear-gradient( 120deg, #0f7a4a 0%, #1f9d6a 40%, #4fd1a1 100%); */
+background:linear-gradient(135deg,#0f7a4a,#0b6d42,#a65d00);
+color:white;
+display:flex;
+flex-direction:column;
+justify-content:center;
+margin:12px;
+border-radius:14px;
+}
+
+
+
+/* RIGHT PANEL TITLE */
+
+.auth-left h2{
+font-size:26px;
+font-weight:600;
+margin-bottom:30px;
+line-height:1.3;
+}
+
+
+
+/* RIGHT PANEL DESCRIPTION */
+
+.auth-left p{
+font-size:14px;
+opacity:0.9;
+margin-bottom:35px;
+line-height:1.5;
+}
+
+
+/* FEATURE BOX */
+
+.feature-box{
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.25);
+padding:9px 14px;
+border-radius:10px;
+font-size:13px;
+margin-bottom:12px;
+backdrop-filter: blur(3px);
+}
+
+
+
+/* LEFT FORM SIDE */
+
+.auth-right{
+flex:1;
+padding:36px;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+
+
+/* FORM TITLE */
+
+.auth-right h3{
+font-size:24px;
+font-weight:600;
+margin-bottom:6px;
+}
+
+
+
+/* FORM DESCRIPTION */
+
+.auth-right p{
+font-size:14px;
+color:#6b7280;
+margin-bottom:12px;
+line-height:1.5;
+}
+
+
+
+/* FORM LABELS */
+
+.form-label{
+font-size:13px;
+font-weight:500;
+margin-bottom:6px;
+}
+
+
+
+/* INPUT FIELD */
+
+.modern-input{
+height:40px;
+border-radius:10px;
+border:1px solid #d6dbe3;
+padding:8px 12px;
+font-size:14px;
+background:#fff;
+transition:all .2s ease;
+}
+
+/* INPUT WITH ICON */
+
+.input-wrapper{
+position:relative;
+}
+
+.input-icon{
+position:absolute;
+left:12px;
+top:38px;
+color:#9ca3af;
+font-size:16px;
+}
+
+.input-with-icon{
+padding-left:38px;
+}
+
+
+/* PASSWORD EYE */
+
+.toggle-password{
+position:absolute;
+right:12px;
+top:38px;
+cursor:pointer;
+color:#9ca3af;
+/* font-size:16px; */
+}
+
+/* INPUT FOCUS */
+
+.modern-input:focus{
+border-color:#22c55e;
+box-shadow:0 0 0 2px rgba(34,197,94,0.15);
+}
+
+
+
+.password-wrapper {
+  position: relative;
+}
+
+/* LEFT lock icon */
+.password-wrapper .input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+/* RIGHT eye icon */
+.password-wrapper .bi-eye,
+.password-wrapper .bi-eye-slash {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 16px;
+  line-height: 1;   /* ✅ prevents jumping */
+  display: flex;    /* ✅ keeps alignment stable */
+  align-items: center;
+}
+
+/* INPUT spacing */
+.password-wrapper input {
+  padding-left: 40px;   /* space for lock icon */
+  padding-right: 40px;  /* space for eye icon */
+}
+
+
+/* LOGIN BUTTON */
+
+.login-btn{
+background:#0b6d42;
+border:none;
+height:40px;
+color:white;
+border-radius:10px;
+font-size:14px;
+font-weight:500;
+transition:all .2s ease;
+}
+
+.login-btn:hover{
+background:#15803d;
+}
+
+
+
+/* LINKS */
+
+a{
+text-decoration:none;
+color:#2563eb;
+font-size:14px;
+}
+
+a:hover{
+text-decoration:underline;
+}
+
+
+
+/* MOBILE RESPONSIVE */
+
+@media (max-width:768px){
+
+.auth-card{
+flex-direction:column;
+}
+
+.auth-left{
+margin:15px;
+}
+
+.auth-right{
+padding:30px;
+}
+
+}

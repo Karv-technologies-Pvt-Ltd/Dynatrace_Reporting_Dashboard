@@ -1,0 +1,373 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dynatrace Reporting Dashboard</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+--dt-bg:#f3f6fb;
+--dt-card:#ffffff;
+--dt-primary:#2b6cff;
+--dt-primary-light:#4f86ff;
+--dt-text:#1f2937;
+--dt-muted:#6b7280;
+}
+
+body{
+font-family:'Inter',sans-serif;
+background:#f3f6fb;
+color:var(--dt-text);
+min-height:100vh;
+padding-bottom:90px;
+}
+
+/* NAVBAR */
+
+.navbar{
+background:#0f172a;
+box-shadow:0 6px 18px rgba(0,0,0,0.25);
+position:fixed;
+top:0;
+left:0;
+width:100%;
+z-index:1000;
+}
+
+.navbar-brand span{
+font-size:1.1rem;
+font-weight:600;
+margin-left:10px;
+}
+
+/* HERO GRADIENT BACKGROUND */
+
+.hero-bg{
+background:linear-gradient(120deg,#0d5bd7 0%, #3c4fd8 40%, #7a3df0 100%);
+/* background: linear-gradient( 120deg, #0c5f3a 0%, #0f7a4a 40%, #2fbf7f 100%); */
+/* background: linear-gradient(
+  120deg,
+  #0f2e25,
+  #0f7a4a,
+  #22c55e */
+/* ); */
+padding-top:90px;
+padding-bottom:140px;
+text-align:center;
+color:white;
+position:relative;
+overflow:hidden;
+}
+
+/* Glow effect */
+
+.hero-bg::before{
+content:"";
+position:absolute;
+width:600px;
+height:600px;
+background:radial-gradient(circle,rgba(255,255,255,0.15),transparent);
+top:-200px;
+right:-200px;
+}
+
+.hero-title{
+font-size:2.6rem;
+font-weight:700;
+}
+
+.hero-subtitle{
+opacity:.9;
+font-size:1rem;
+margin-top:10px;
+}
+
+/* CARDS */
+
+.feature-card{
+border:none;
+border-radius:18px;
+overflow:hidden;
+background:rgba(255,255,255,0.95);
+transition:all .3s ease;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+.feature-card:hover{
+transform:translateY(-8px);
+box-shadow:0 20px 45px rgba(0,0,0,0.15);
+}
+
+.feature-card img{
+height:160px;
+width:100%;
+object-fit:cover;
+}
+
+.feature-card h5{
+font-weight:600;
+margin-bottom:8px;
+}
+
+.feature-card p{
+font-size:.9rem;
+color:var(--dt-muted);
+}
+
+/* BUTTON */
+
+.feature-card .btn{
+border-radius:999px;
+font-weight:600;
+padding:8px 16px;
+border:1px solid var(--dt-primary);
+color:var(--dt-primary);
+}
+
+.feature-card .btn:hover{
+background:linear-gradient(135deg,var(--dt-primary),var(--dt-primary-light));
+color:white;
+border:none;
+}
+
+/* FOOTER */
+
+footer{
+background:#0f172a;
+font-size:.85rem;
+}
+
+/* CARD LOAD ANIMATION */
+
+.row .col-md-4{
+animation:fadeUp .6s ease forwards;
+opacity:0;
+}
+
+.row .col-md-4:nth-child(1){animation-delay:.1s}
+.row .col-md-4:nth-child(2){animation-delay:.2s}
+.row .col-md-4:nth-child(3){animation-delay:.3s}
+.row .col-md-4:nth-child(4){animation-delay:.4s}
+.row .col-md-4:nth-child(5){animation-delay:.5s}
+.row .col-md-4:nth-child(6){animation-delay:.6s}
+
+@keyframes fadeUp{
+from{
+opacity:0;
+transform:translateY(25px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar navbar-expand-lg navbar-dark py-2">
+<div class="container">
+
+<a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
+<img src="/static/KARVTECH LOGO-03-03.png" height="26">
+<span>Dynatrace Reporting Dashboard</span>
+</a>
+
+<div class="ms-auto">
+<ul class="navbar-nav align-items-center">
+
+{% if user.is_authenticated %}
+
+<li class="nav-item me-3 text-white">
+<i class="bi bi-person-circle"></i>
+Welcome, {{ user.username }}
+</li>
+
+<li class="nav-item">
+<a class="btn btn-sm btn-outline-light" href="{% url 'logout' %}">
+<i class="bi bi-box-arrow-right"></i> Logout
+</a>
+</li>
+
+{% endif %}
+
+</ul>
+</div>
+
+</div>
+</nav>
+
+<!-- HERO SECTION -->
+
+<section class="hero-bg">
+
+<div class="container">
+
+<h1 class="hero-title">
+Dynatrace Reporting Dashboard
+</h1>
+
+<p class="hero-subtitle">
+Centralized reporting powered by Dynatrace monitoring data
+</p>
+
+</div>
+
+</section>
+
+<!-- MAIN CONTENT -->
+
+<div class="container" style="margin-top:-90px;">
+
+<div class="row g-4">
+
+<!-- Capacity -->
+
+<div class="col-md-4">
+<div class="card feature-card h-100">
+<img src="/static/Capacity_Management.jpg">
+<div class="card-body">
+
+<h5><i class="bi bi-cpu"></i> Capacity Management</h5>
+
+<p>Analyze CPU, memory, disk usage and availability trends.</p>
+
+<a href="{% url 'capacity-base' %}" class="btn w-100">
+View Report
+</a>
+
+</div>
+</div>
+</div>
+
+<!-- Problem -->
+
+<div class="col-md-4">
+<div class="card feature-card h-100">
+<img src="/static/Problem_Analysis.jpg">
+<div class="card-body">
+
+<h5><i class="bi bi-exclamation-triangle"></i> Problem Analysis</h5>
+
+<p>Automated problem analysis based on Dynatrace detected issues.</p>
+
+<a href="{% url 'problem_data' %}" class="btn w-100">
+View Report
+</a>
+
+</div>
+</div>
+</div>
+
+<!-- Users -->
+
+<div class="col-md-4">
+<div class="card feature-card h-100">
+<img src="/static/User_Access_Management.jpg">
+<div class="card-body">
+
+<h5><i class="bi bi-people"></i> User Access Management</h5>
+
+<p>Track user permissions, roles and login activity.</p>
+
+<a href="{% url 'user_management' %}" class="btn w-100">
+Manage Users
+</a>
+
+</div>
+</div>
+</div>
+
+<!-- Software -->
+
+<div class="col-md-4">
+<div class="card feature-card h-100">
+<img src="/static/Software Inventory.jpg">
+<div class="card-body">
+
+<h5><i class="bi bi-box"></i> Software Inventory</h5>
+
+<p>Detected technologies and running instances across hosts.</p>
+
+<a href="{% url 'sbom' %}" class="btn w-100">
+View Report
+</a>
+
+</div>
+</div>
+</div>
+
+<!-- Email -->
+
+<div class="col-md-4">
+<div class="card feature-card h-100">
+<img src="/static/Email_Scheduler.jpg">
+<div class="card-body">
+
+<h5><i class="bi bi-envelope"></i> Email Scheduler</h5>
+
+<p>Schedule automated reports delivered via email.</p>
+
+<a href="{% url 'email_scheduler' %}" class="btn w-100">
+Open Scheduler
+</a>
+
+</div>
+</div>
+</div>
+
+<!-- AI -->
+
+<div class="col-md-4">
+<div class="card feature-card h-100">
+<img src="/static/Ask_to_AI.jpg">
+<div class="card-body">
+
+<h5><i class="bi bi-robot"></i> Ask to AI</h5>
+
+<p>AI-driven insights and analysis assistance.</p>
+
+<a href="{% url 'ask-ai' %}" class="btn w-100">
+Ask Anything
+</a>
+
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- FOOTER -->
+
+<footer class="fixed-bottom py-3">
+<div class="container d-flex justify-content-between align-items-center text-white">
+
+<div>© {% now "Y" %} Karv Technologies Pvt. Ltd</div>
+
+<div class="d-none d-sm-block">
+Version 0.1
+</div>
+
+</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

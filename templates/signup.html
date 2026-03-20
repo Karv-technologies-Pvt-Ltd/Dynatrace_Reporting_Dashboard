@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Sign Up - KarvOps{% endblock %}
+
+{% block auth_content %}
+<div>
+
+  <h4 class="mb-2 headline">Create Account</h4>
+
+  <p style="font-size:14px;color:#6b7280;margin-bottom:20px;">
+    Create your account to access Dynatrace reports, monitoring insights, and system analytics.
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+
+  <!-- Username -->
+<div class="mb-2 password-wrapper">
+  <i class="bi bi-person input-icon"></i>
+  <input
+    class="form-control"
+    placeholder="Username"
+    name="username"
+    required
+  >
+</div>
+
+<!-- Email -->
+<div class="mb-2 password-wrapper">
+  <i class="bi bi-envelope input-icon"></i>
+  <input
+    class="form-control"
+    type="email"
+    placeholder="Email"
+    name="email"
+    required
+  >
+</div>
+
+    <!-- Password -->
+    <div class="mb-2 password-wrapper">
+          <i class="bi bi-lock input-icon"></i>
+      <input
+        type="password"
+        class="form-control"
+        placeholder="Password"
+        name="password"
+        id="signupPassword"
+        required
+      >
+      <i class="bi bi-eye" onclick="togglePassword('signupPassword', this)"></i>
+    </div>
+
+    <!-- Confirm Password -->
+    <div class="mb-3 password-wrapper">
+           <i class="bi bi-lock input-icon"></i>
+
+      <input
+        type="password"
+        class="form-control"
+        placeholder="Confirm Password"
+        name="confirm_password"
+        id="signupConfirmPassword"
+        required
+      >
+      <i class="bi bi-eye" onclick="togglePassword('signupConfirmPassword', this)"></i>
+    </div>
+
+    <button class="btn login-btn w-100">Sign Up</button>
+
+    <div class="text-center mt-3">
+      Already have an account? <a href="{% url 'login' %}">Login</a>
+    </div>
+
+  </form>
+</div>
+{% endblock %}

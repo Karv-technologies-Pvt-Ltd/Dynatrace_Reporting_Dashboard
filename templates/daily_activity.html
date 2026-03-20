@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Monthly | Capacity Management Reporting</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body{background:#f8f9fa}
+    .page-wrap{max-width:980px;margin:48px auto}
+    .card{border-radius:14px}
+    .filter-input{position:sticky;top:0;z-index:1}
+  </style>
+ 
+  <style>
+      body {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400; /* normal thickness for body text */
+    padding-bottom: 80px; /* Adjust depending on your footer height */
+  }
+ 
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600; /* semi-bold for headings */
+  }
+ 
+  .navbar-brand {
+    font-weight: 700; /* bold for logo/brand */
+  }
+ 
+  .btn {
+    font-weight: 600; /* semi-bold for buttons */
+  }
+ 
+  p {
+    font-weight: 400; /* normal for paragraphs */
+  }
+  </style>
+</head>
+<body>
+<!-- 🔹 Navbar (Top Bar) -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark border-top py-2">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-white d-flex align-items-center" href="{% url 'index' %}">
+           
+            <!-- ✅ Adjusted logo size -->
+            <img src="/static/KARVTECH LOGO-03-03.png"
+                 alt="Logo"
+                 class="align-middle"
+                 style="
+                    height: 25px;
+                    width: auto;
+                    object-fit: contain;
+                 ">
+ 
+            <!-- ✅ Added spacing between logo & text -->
+            <span style="
+                font-size: 1.10rem;
+                font-weight: 400;
+                margin-left: 20px;      /* ✅ spacing added */
+            ">
+                Dynatrace Reporting Dashboard
+            </span>
+        </a>
+ 
+        <div class="ms-auto">
+            <ul class="navbar-nav align-items-center">
+                {% if user.is_authenticated %}
+                    <li class="nav-item me-3 text-white">
+                        Welcome, {{ user.username }}
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-outline-light me-2" href="{% url 'logout' %}">
+                            Logout
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="nav-item me-2">
+                        <a class="btn btn-sm btn-outline-light" href="{% url 'login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-outline-light" href="{% url 'signup' %}">Sign Up</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="page-wrap">
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+<div class="container mt-5">
+                <div class="text-start mt-4">
+        <a href="{% url 'capacity-base' %}" class="btn btn-outline-secondary">Back to Home</a>
+    </div>
+ 
+      <h3 class="text-center text-primary mb-4">Capacity Management Reporting</h3>
+ 
+      {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+      {% if message %}<div class="alert alert-info">{{ message }}</div>{% endif %}
+ 
+      <!-- Step 1: Tenant + Token + Validate -->
+      <form method="post" action="" class="mb-3">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="validate">
+        <div class="mb-3">
+          <label class="form-label" for="tenant_url">Dynatrace Tenant URL</label>
+          <input type="url" class="form-control" id="tenant_url" name="tenant_url"
+                 placeholder="https://yourtenant.live.dynatrace.com"
+                 value="{{ tenant_url|default:'' }}" required>
+        </div>
+ 
+        <div class="mb-3">
+          <label class="form-label" for="access_token">Access Token</label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="access_token" name="access_token"
+                   placeholder="dt0c01..." value="{{ access_token|default:'' }}" required>
+            <button type="button" class="btn btn-outline-secondary" id="toggleToken">Show</button>
+          </div>
+          <div class="form-text">Token must allow Read Metrics, Read Entity v2 and Read Config v1.</div>
+        </div>
+ 
+        <div class="d-grid d-sm-inline">
+          <button class="btn btn-success px-4" type="submit">Validate</button>
+        </div>
+      </form>
+ 
+      <!-- Step 2: show after validate -->
+      {% if validated %}
+      <form method="post" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="download">
+        <!-- persist validated creds so we don't ask again -->
+        <input type="hidden" name="tenant_url" value="{{ tenant_url }}">
+        <input type="hidden" name="access_token" value="{{ access_token }}">
+ 
+    <!-- Management Zone -->
+    <div class="mb-3">
+      <label class="form-label">Management Zone</label>
+      <select class="form-select" id="management_zone" name="management_zone" required>
+        <option value="All" selected>All</option>
+        {% for z in zones %}
+          <option value="{{ z.id }}">{{ z.name }}</option>
+        {% endfor %}
+      </select>
+      <div class="form-text">Pick a management zone or keep “All”.</div>
+    </div>
+ 
+ 
+        <!-- Time Frame -->
+        <div class="mb-3">
+          <label class="form-label" for="timeframe">Time Frame</label>
+          {% with tf=timeframe|default:'Last 1 Day' %}
+          <select class="form-select" id="timeframe" name="timeframe" required>
+                        <option value="today" {% if tf == 'today' %}selected{% endif %}>Today</option>
+            <option value="yesterday" {% if tf == 'yesterday' %}selected{% endif %}>Yesterday</option>
+            {% comment %} <option value="Last 1 Day" {% if tf == 'Last 1 Day' %}selected{% endif %}>Last 1 Day</option> {% endcomment %}
+            <option value="Last 7 Days" {% if tf == 'Last 7 Days' %}selected{% endif %}>Last 7 Days</option>
+            <option value="Last 30 Days" {% if tf == 'Last 30 Days' %}selected{% endif %}>Last 30 Days</option>
+ 
+            <option value="1h" {% if tf == '1h' %}selected{% endif %}>Last 1 Hour</option>
+          </select>
+          {% endwith %}
+        </div>
+ 
+       
+ 
+ 
+        <!-- 🔹 File Format Selection -->
+<div class="mb-4">
+  <label class="form-label d-block">Select File Format</label>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="format" id="format_excel" value="excel" checked>
+    <label class="form-check-label" for="format_excel">📈 Excel</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="format" id="format_csv" value="csv">
+    <label class="form-check-label" for="format_csv">📊 CSV</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="format" id="format_pdf" value="pdf">
+    <label class="form-check-label" for="format_pdf">📄 PDF</label>
+  </div>
+</div>
+ 
+<!-- 🔹 Download Button -->
+<div class="text-center">
+  <button class="btn btn-primary px-5" type="submit">
+    Download
+  </button>
+</div>
+ 
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+ 
+   <!-- Footer -->
+    <div class="container-fluid text-white " >
+        <footer class="main-footer fixed-bottom bg-dark border-top py-3" >
+            <div class="container d-flex justify-content-between align-items-center">
+                <div class="text-start mb-0" >
+                    <strong>Copyright &copy; {% now "Y" %}, Karv Technologies Pvt. Ltd</strong>
+                </div>
+                <div class="text-end d-none d-sm-inline-block">
+                    <strong>Version 0.1</strong>
+                </div>
+            </div>
+        </footer>
+    </div>
+ 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+ 
+ 
+<script>
+  // show/hide token
+  (function(){
+    const btn = document.getElementById('toggleToken');
+    if (!btn) return;
+    btn.addEventListener('click', function(){
+      const i = document.getElementById('access_token');
+      const show = i.type === 'password';
+      i.type = show ? 'text' : 'password';
+      btn.textContent = show ? 'Hide' : 'Show';
+    });
+  })();
+ 
+  // filter management zones
+  (function(){
+    const input = document.getElementById('mzFilter');
+    const select = document.getElementById('management_zone');
+    if (!input || !select) return;
+    input.addEventListener('input', function(){
+      const q = input.value.toLowerCase();
+      Array.from(select.options).forEach(opt => {
+        if (opt.value === "All") { opt.hidden = false; return; }
+        opt.hidden = !opt.text.toLowerCase().includes(q);
+      });
+    });
+  })();
+</script>
+</body>
+</html>
+ 

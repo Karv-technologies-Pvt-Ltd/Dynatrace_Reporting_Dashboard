@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Login - KarvOps{% endblock %}
+
+{% block auth_content %}
+
+<div style="width:100%;max-width:360px;">
+
+<h3>Log in to your account</h3>
+
+<p>
+Access Dynatrace reports, monitoring insights, and system analytics.
+</p>
+
+<form method="post">
+{% csrf_token %}
+
+<!-- USERNAME -->
+
+<div class="mb-3 input-wrapper">
+
+<label class="form-label">Username</label>
+
+<i class="bi bi-envelope input-icon"></i>
+
+<input
+type="text"
+class="form-control modern-input input-with-icon"
+name="username"
+placeholder="admin@example.com"
+required>
+
+</div>
+
+
+
+<!-- PASSWORD -->
+
+<div class="mb-3 input-wrapper password-wrapper">
+
+<label class="form-label">Password</label>
+
+<i style="top:70%;" class="bi bi-lock input-icon"></i>
+
+<input
+type="password"
+class="form-control modern-input input-with-icon"
+name="password"
+id="loginPassword"
+placeholder="Enter password"
+required>
+
+<i style="top:70%;" class="bi bi-eye toggle-password" onclick="togglePassword('loginPassword', this)"></i>
+
+</div>
+
+
+
+<button class="btn login-btn w-100">
+Log in
+</button>
+
+
+<div class="text-center mt-3">
+<a href="{% url 'forgot_password' %}">
+Forgot password?
+</a>
+</div>
+
+
+<div class="text-center mt-2">
+Don't have an account?
+<a href="{% url 'signup' %}">Sign up</a>
+</div>
+
+</form>
+
+</div>
+
+{% endblock %}

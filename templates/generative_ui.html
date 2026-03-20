@@ -1,0 +1,194 @@
+{% extends "layout.html" %}
+{% load static %}
+
+<!-- {% block title %}Generative AI Dashboard{% endblock %} -->
+
+{% block extra_css %}
+<style>
+    body { background: #fafafa; }
+    .main-content { padding-top: 140px; padding-bottom: 60px; }
+    .fixed-top-bar { position: fixed; top: 52px; left: 0; width: 100%; background: #fafafa; padding: 12px 0; z-index: 1040; text-align: center; }
+    .input-wrapper { position: relative; width: 55%; gap: 20px; display: inline-flex; }
+    #queryInput { width: 100%; padding: 15px; border-radius: 30px; border: 1px solid #888; }
+    .send-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 35px; cursor: pointer; }
+        .card { background: white; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+
+    #metricChart { background: white; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
+    th { background: #f3f4f6; }
+
+    .chart-controls { text-align: right; margin-bottom: 10px; }
+        #chartTypeSelect {padding: 3px 1px;  border-radius: 4px;border: 1px solid #ccc;}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fixed-top-bar">
+    <h2 style="font-weight:500;">Generative AI</h2>
+    <div class="input-wrapper d-inline-flex">
+         <a href="/ask-ai" class="btn btn-outline-secondary me-2 mt-2" style="width:112px;height:40px;">← Back</a>
+        <input type="text" id="queryInput" placeholder="host cpu > 50 | process memory | service availability">
+        <img src="{% static 'arrow_up.png' %}" class="send-icon" onclick="runSearch()">
+    </div>
+    <hr>
+</div>
+
+<div class="main-content container">
+
+    <div class="chart-controls" id="chartControls" style="display:none;">
+        <select id="chartTypeSelect" style="margin-right: 10px;">
+            <option value="line">Line Graph</option>
+            <option value="bar">Bar Graph</option>
+        </select>
+            <!-- Download icon button -->
+    <img
+        src="{% static 'download.png' %}"
+        alt="Download PDF"
+        title="Download PDF"
+        style="width:17px; cursor:pointer;"
+        onclick="downloadChart()"
+    />
+
+    </div>
+        <canvas id="metricChart" height="120" style="display:none;"></canvas>
+    <div class="card" id="tableCard" style="display:none;">
+        <h5>Live Metrics</h5>
+        <table>
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+let chart;
+let currentData = null;   // ⭐ stores latest API response
+
+function runSearch() {
+    const query = document.getElementById("queryInput").value;
+
+    fetch(`/ai-search/?q=${encodeURIComponent(query)}`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+        currentData = data;  // ⭐ SAVE DATA FOR PDF
+
+        document.getElementById("metricChart").style.display = "block";
+        document.getElementById("chartControls").style.display = "block";
+        document.getElementById("tableCard").style.display = "block";
+
+        renderTable(data);
+        renderChart(data);
+    });
+}
+
+function renderTable(data) {
+    const head = document.getElementById("tableHead");
+    const body = document.getElementById("tableBody");
+
+    let nameField = "host_name";
+    if (data.source === "process") nameField = "process_name";
+    if (data.source === "service") nameField = "service_name";
+
+    // ✅ Add Date column in header
+    head.innerHTML = `<tr>
+        <th>Host Name</th>
+        <th>${data.metric.replace("_", " ").toUpperCase()}</th>
+        <th>Date</th>
+    </tr>`;
+
+    body.innerHTML = "";
+
+    data.results.forEach(r => {
+        let value = r[data.metric] ?? 0;
+
+        // Format date nicely (optional but recommended)
+        let rawDate = r.record_date; 
+        let parts = rawDate.split("-"); 
+        let formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`; // "28-01-2026"
+
+        body.innerHTML += `<tr>
+            <td>${r[nameField]}</td>
+            <td>${parseFloat(value).toFixed(2)}</td>
+            <td>${formattedDate}</td>
+        </tr>`;
+    });
+}
+
+
+function renderChart(data) {
+    const ctx = document.getElementById("metricChart").getContext("2d");
+    if (chart) chart.destroy();
+
+    const labels = data.chart.labels;
+    const values = data.chart.values;
+
+    chart = new Chart(ctx, {
+        type: document.getElementById("chartTypeSelect").value,
+        data: {
+            labels: labels,
+            datasets: [{
+                label: data.metric.replace("_", " ").toUpperCase(),
+                data: values,
+                borderColor: "#4f46e5",
+                backgroundColor: "rgba(79,70,229,0.3)",
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true }
+            },
+            scales: {
+                y: { min: 0, title: { display: true, text: currentData.metric } },
+                x: { title: { display: true, text: "Date" } }
+
+            }
+        }
+    });
+}
+document.getElementById("chartTypeSelect").addEventListener("change", runSearch);
+function downloadChart() {
+    if (!currentData || !chart) {
+        alert("No chart available to download.");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const canvas = document.getElementById("metricChart");
+    const imgData = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width + 100, canvas.height + 120]
+    });
+
+    // Title
+    pdf.setFontSize(18);
+    pdf.text(`GenAI Metrics Report`, 50, 30);
+
+    pdf.setFontSize(12);
+    pdf.text(`Metric: ${currentData.metric.replace("_", " ").toUpperCase()}`, 50, 50);
+    pdf.text(`Source: ${currentData.source.toUpperCase()}`, 250, 50);
+    pdf.text(`Generated: ${new Date().toLocaleString()}`, 450, 50);
+
+    // Chart image
+    pdf.addImage(imgData, 'PNG', 50, 70, canvas.width, canvas.height);
+
+    pdf.save(`${currentData.source}_${currentData.metric}.pdf`);
+}
+</script>
+
+{% endblock %}

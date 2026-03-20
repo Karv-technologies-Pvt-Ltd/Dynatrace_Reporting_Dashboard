@@ -1,0 +1,179 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block title %}Capacity Management Report{% endblock %}
+
+{% block extra_css %}
+<style>
+body {
+    background: linear-gradient(120deg, #eef2ff, #f8fafc);
+}
+
+/* WRAPPER */
+.page-wrapper {
+    width: 100%;
+    max-width: 1000px;
+    margin: auto;
+    padding-top: 20px;
+    justify-content: center; 
+
+}
+
+/* BACK BUTTON */
+.top-bar {
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    padding: 6px 14px;
+    margin-left: 42px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    text-decoration: none;
+    color: #333;
+}
+
+/* MAIN CARD */
+.main-card {
+    width: 815px;
+    height: 355px;
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border-radius: 20px;
+
+    /* GLASS EFFECT */
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+/* SECTIONS */
+.section {
+    flex: 1;
+    text-align: center;
+}
+
+/* ICON */
+.icon {
+    width: 95px;
+    margin-bottom: 10px;
+    filter: brightness(0) saturate(100%) invert(30%) sepia(80%) saturate(1500%) hue-rotate(230deg);
+}
+
+/* TEXT */
+.section h2 {
+    font-size: 21px;
+    font-weight: 600;
+    color: #333;
+}
+
+.section p {
+    font-size: 13px;
+    color: #555;
+}
+
+/* DIVIDER */
+.divider {
+    width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* LINE */
+.divider::before {
+    content: "";
+    position: absolute;
+    width: 1px;
+    height: 60%;
+    background: #ccc;
+}
+
+/* OR TEXT */
+.or-badge {
+    width: 65px;
+    height: 65px;
+    background: linear-gradient(120deg, #7a3df0, #2f80ed);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* ARROW */
+.arrow-icon {
+    width: 25px;
+    margin-top: 8px;
+    transition: 0.3s;
+}
+
+.arrow-icon:hover {
+    transform: translateX(6px);
+}
+.content-box {
+    width: 900px;
+    padding-left: 5px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-wrapper">
+<div class="content-box">
+    <!-- BACK BUTTON -->
+    <div class="top-bar">
+        <a href="{% url 'index' %}" class="back-btn">
+            ← Back to Home
+        </a>
+    </div>
+
+    <!-- MAIN CARD -->
+    <div class="main-card">
+
+        <!-- LEFT -->
+          <div class="section">
+            <a style="text-decoration: none;" href="{% url 'capacity_management' %}">
+            <img src="{% static 'capacity2.png' %}" class="icon">
+            <h2>Weekly Report</h2>
+            </a>
+            <p>Generates weekly reports with key insights.</p>
+
+            <a href="{% url 'capacity_management' %}">
+                <img src="{% static 'right-arrow.png' %}" class="arrow-icon">
+            </a>
+        </div>
+       
+
+        <!-- OR -->
+              <div class="or-badge">OR</div>
+
+
+        <!-- RIGHT -->
+        <div class="section">
+            <a style="text-decoration: none;" href="{% url 'capacity_management' %}">
+            <img src="{% static 'capacity1.png' %}" class="icon">
+            <h2>Monthly Report</h2>
+            </a>
+            <p>Generates monthly reports with detailed insights.</p>
+
+            <a href="{% url 'daily_activity' %}">
+                <img src="{% static 'right-arrow.png' %}" class="arrow-icon">
+            </a>
+        </div>
+
+    </div>
+
+</div>
+</div>
+{% endblock %}

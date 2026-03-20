@@ -1,0 +1,180 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block title %}AI Comparison{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #fafafa;
+    }
+/* PAGE ALIGNMENT */
+.page-wrapper {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* BACK BUTTON BAR */
+.top-bar {
+    width: 940px;
+    margin-bottom: 25px;
+}
+
+/* BACK BUTTON STYLE */
+.back-btn {
+    padding: 6px 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #333;
+    background: #fff;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    background: #f0f0f0;
+}
+
+/* MAIN CONTAINER */
+.compare-container {
+    width: 940px;
+    height: 440px;
+    position: relative;
+    display: flex;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 15px 25px rgba(0,0,0,0.15);
+}
+
+/* LEFT */
+.ai-section.left {
+    flex: 1;
+    background: #fafafa;
+    /* background: linear-gradient(120deg, #7a3df0, #5a4cf0); */
+    color: #5a4cf0;
+}
+
+/* RIGHT */
+.ai-section.right {
+    flex: 1;
+    background: linear-gradient(
+        to right,
+        #7a3df0,
+        #5a4cf0,
+        #4c6ef5,
+        #2f80ed
+    );
+    color: white;
+}
+
+/* COMMON */
+.ai-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    text-align: center;
+}
+
+.icon {
+    width: 130px;
+    margin-bottom: 18px;
+}
+
+.ai-section h2 {
+    font-size: 33px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.ai-section p {
+    font-size: 15px;
+    max-width: 250px;
+    margin-top: 20px;
+    font-weight: 600;
+}
+
+/* VS CIRCLE */
+.vs-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    color: #5a4cf0;
+    font-weight: bold;
+    font-size: x-large;
+    width: 90px;
+    height: 90px;
+    border: 5px solid #5a4cf0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ARROW */
+.arrow-icon {
+    width: 30px;
+    margin-top: 10px;
+    transition: 0.3s;
+    
+}
+
+.arrow-icon:hover {
+    transform: translateX(6px);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="page-wrapper">
+
+        <!-- BACK BUTTON -->
+        <div class="top-bar">
+            <a href="{% url 'index' %}" class="back-btn">
+                ← Back to Home
+            </a>
+        </div>
+
+        <!-- MAIN COMPARISON UI -->
+        <div class="compare-container">
+
+            <!-- LEFT SIDE -->
+            <div class="ai-section left">
+                                <h2>Generative AI</h2>
+
+                <a href="{% url 'generative-ui' %}">
+                <img src="{% static 'generative.png' %}" class="icon"></a>
+                 <p>Converts natural language queries into structured insights with charts and tables.</p>
+                <a href="{% url 'generative-ui' %}">
+                    <img src="{% static 'right-arrow.png' %}" class="arrow-icon">
+                </a>
+            </div>
+
+            <!-- VS -->
+            <div class="vs-circle">OR</div>
+
+            <!-- RIGHT SIDE -->
+            <div class="ai-section right">
+                                <h2>Predictive AI</h2>
+
+                <a href="{% url 'predictive-ui' %}">
+                <img src="{% static 'prediction.png' %}" style="filter: brightness(0) invert(1);" class="icon"></a>
+                <p>Analyzes historical data to predict future trends in CPU, memory, and disk usage.</p>
+                <a href="{% url 'predictive-ui' %}">
+                    <img src="{% static 'right-arrow.png' %}" class="arrow-icon">
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
